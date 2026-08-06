@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="GamePulse - Encuentra dónde jugar tus videojuegos favoritos y sus modos de juego.">
+  <title>GamePulse | Directorio de Juegos</title>
+  <style>
+    /* --- VARIABLES Y ESTILOS BASE --- */
+    :root {
+      --bg-main: #0a0c14;
+      --bg-card: #141824;
+      --bg-card-hover: #1c2235;
+      --accent-cyan: #00f0ff;
+      --accent-purple: #7000ff;
+      --accent-green: #00ff88;
+      --accent-yellow: #ffb703;
+      --text-main: #f1f5f9;
+      --text-sub: #94a3b8;
+      --border-color: #232a3e;
+      --radius: 12px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* --- HEADER --- */
+    header {
+      background-color: rgba(20, 24, 36, 0.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+
+    /* --- MAIN & HERO --- */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      background: radial-gradient(circle at top, #1e1b4b 0%, var(--bg-main) 80%);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      margin-bottom: 2rem;
+    }
+
+    .hero h1 {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero p {
+      color: var(--text-sub);
+    }
+
+    /* --- BUSCADOR --- */
+    .search-section {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 1rem;
+      background-color: var(--bg-main);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-box:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    }
+
+    /* --- GRILLA DE JUEGOS --- */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .game-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1rem;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .game-card:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-3px);
+      background-color: var(--bg-card-hover);
+      box-shadow: 0 4px 15px rgba(0, 240, 255, 0.1);
+    }
+
+    .game-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .badge-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .badge-label {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-store {
+      background-color: rgba(0, 255, 136, 0.1);
+      color: var(--accent-green);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .badge-mode {
+      background-color: rgba(255, 183, 3, 0.1);
+      color: var(--accent-yellow);
+      border: 1px solid rgba(255, 183, 3, 0.2);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .click-hint {
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      text-align: right;
+      font-weight: 600;
+    }
+
+    /* --- MODAL DE REQUISITOS --- */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 12, 20, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-content {
+      background-color: var(--bg-card);
+      border: 1px solid var(--accent-cyan);
+      border-radius: var(--radius);
+      width: 90%;
+      max-width: 600px;
+      padding: 2rem;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
+      position: relative;
+      transform: translateY(20px);
+      transition: var(--transition);
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1.2rem;
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      font-size: 1.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .close-btn:hover {
+      color: var(--accent-cyan);
+    }
+
+    .modal-title {
+      font-size: 1.6rem;
+      margin-bottom: 1rem;
+      color: var(--text-main);
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+
+    .req-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    @media (min-width: 500px) {
+      .req-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .req-box {
+      background-color: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .req-box h4 {
+      color: var(--accent-cyan);
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .req-box.rec h4 {
+      color: var(--accent-green);
+    }
+
+    .req-box p {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      margin-bottom: 0.4rem;
+    }
+
+    .req-box strong {
+      color: var(--text-main);
+    }
+
+    /* --- FOOTER --- */
+    footer {
+      background-color: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--text-sub);
+      font-size: 0.9rem;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="#" class="logo">GamePulse</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Directorio de Videojuegos</h1>
+      <p>Haz clic en cualquier juego para ver sus <strong>requisitos del sistema</strong>.</p>
+    </section>
+
+    <!-- Buscador en Tiempo Real -->
+    <section class="search-section">
+      <input type="text" id="searchInput" class="search-box" placeholder="Busca por juego, tienda (Steam, Epic) o modo (Amigos, Historia)..." onkeyup="filtrarJuegos()">
+    </section>
+
+    <!-- Lista de Juegos -->
+    <section>
+      <div id="results-grid" class="results-grid">
+        <!-- Se genera automáticamente -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Emergente de Requisitos -->
+  <div id="reqModal" class="modal-overlay" onclick="cerrarModalAfuera(event)">
+    <div class="modal-content">
+      <button class="close-btn" onclick="cerrarModal()">&times;</button>
+      <h2 id="modalGameTitle" class="modal-title">Título del Juego</h2>
+      
+      <div class="req-grid">
+        <div class="req-box">
+          <h4>Requisitos Mínimos</h4>
+          <p><strong>SO:</strong> <span id="minOs">---</span></p>
+          <p><strong>CPU:</strong> <span id="minCpu">---</span></p>
+          <p><strong>RAM:</strong> <span id="minRam">---</span></p>
+          <p><strong>GPU:</strong> <span id="minGpu">---</span></p>
+        </div>
+        <div class="req-box rec">
+          <h4>Requisitos Recomendados</h4>
+          <p><strong>SO:</strong> <span id="recOs">---</span></p>
+          <p><strong>CPU:</strong> <span id="recCpu">---</span></p>
+          <p><strong>RAM:</strong> <span id="recRam">---</span></p>
+          <p><strong>GPU:</strong> <span id="recGpu">---</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; GamePulse. Todos los derechos reservados.</p>
+  </footer>
+
+  <script>
+    // Base de datos de juegos extendida con Requisitos
+    const catálogoJuegos = [
+      { 
+        nombre: "Valorant", 
+        tienda: "Riot Games Launcher (PC)", 
+        modo: "Multijugador / Con Amigos",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core 2 Duo E8400", ram: "4 GB", gpu: "Intel HD 4000" },
+          rec: { os: "Windows 10/11 64-bit", cpu: "Intel i5-9400F 2.9GHz", ram: "8 GB", gpu: "GTX 1050 Ti / RX 570" }
+        }
+      },
+      { 
+        nombre: "Fortnite", 
+        tienda: "Epic Games / Consolas / Android", 
+        modo: "Multijugador / Con Amigos",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Core i3-3225 3.3 GHz", ram: "8 GB", gpu: "Intel HD 4000 / AMD Radeon HD 7870" },
+          rec: { os: "Windows 10/11 64-bit", cpu: "Core i5-7300U 3.5 GHz", ram: "16 GB", gpu: "Nvidia GTX 960 / AMD R9 280" }
+        }
+      },
+      { 
+        nombre: "Counter-Strike 2", 
+        tienda: "Steam (PC)", 
+        modo: "Multijugador / Competitivo",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i5 750", ram: "8 GB", gpu: "GTX 660 / Radeon HD 7850 (1GB)" },
+          rec: { os: "Windows 10/11 64-bit", cpu: "Intel Core i7 9700k", ram: "16 GB", gpu: "Nvidia RTX 2060 / RX 5700 XT" }
+        }
+      },
+      { 
+        nombre: "Grand Theft Auto V", 
+        tienda: "Steam / Epic / PlayStation / Xbox", 
+        modo: "Historia (Solo) / GTA Online",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core 2 Quad Q6600", ram: "4 GB", gpu: "NVIDIA 9800 GT 1GB" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel Core i5 3470", ram: "8 GB", gpu: "NVIDIA GTX 660 2GB" }
+        }
+      },
+      { 
+        nombre: "League of Legends", 
+        tienda: "Riot Games Client (PC)", 
+        modo: "Multijugador / Con Amigos",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i3-530", ram: "4 GB", gpu: "Intel HD 4600 / GeForce 9600GT" },
+          rec: { os: "Windows 10/11 64-bit", cpu: "Intel Core i5-3300", ram: "4 GB", gpu: "GeForce GTX 560 / Radeon HD 6950" }
+        }
+      },
+      { 
+        nombre: "Apex Legends", 
+        tienda: "Steam / EA App / Consolas", 
+        modo: "Multijugador / Con Amigos",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i3-6300 3.8GHz", ram: "6 GB", gpu: "Nvidia GeForce GT 640" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel i5 3570K", ram: "8 GB", gpu: "Nvidia GeForce GTX 970" }
+        }
+      },
+      { 
+        nombre: "Minecraft", 
+        tienda: "Microsoft Store / Consolas / Mobile", 
+        modo: "Solo / Cooperativo con Amigos",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i3-3210", ram: "4 GB", gpu: "Intel HD Graphics 4000" },
+          rec: { os: "Windows 10/11 64-bit", cpu: "Intel Core i5-4690", ram: "8 GB", gpu: "Nvidia GeForce 700 Series" }
+        }
+      },
+      { 
+        nombre: "EA Sports FC 24", 
+        tienda: "Steam / Epic Games / EA App / Consolas", 
+        modo: "Un Jugador / Multijugador",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i5-6600K", ram: "8 GB", gpu: "NVIDIA GeForce GTX 1050 Ti 4GB" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel Core i7-6700", ram: "12 GB", gpu: "NVIDIA GeForce GTX 1660" }
+        }
+      },
+      { 
+        nombre: "Rocket League", 
+        tienda: "Epic Games / Consolas", 
+        modo: "Multijugador / Con Amigos",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Dual Core 2.5 GHz", ram: "4 GB", gpu: "NVIDIA GeForce GTX 760" },
+          rec: { os: "Windows 10 64-bit", cpu: "Quad Core 3.0+ GHz", ram: "8 GB", gpu: "NVIDIA GeForce GTX 1060" }
+        }
+      },
+      { 
+        nombre: "Brawl Stars", 
+        tienda: "Google Play / Apple App Store", 
+        modo: "Multijugador / Con Amigos",
+        req: {
+          min: { os: "Android 5.0 / iOS 11.0", cpu: "Quad-Core 1.2 GHz", ram: "2 GB", gpu: "Mali-T720 / Adreno 306" },
+          rec: { os: "Android 10+ / iOS 14+", cpu: "Octa-Core 2.0 GHz", ram: "4 GB", gpu: "Adreno 618 / Apple A12" }
+        }
+      },
+      { 
+        nombre: "Fall Guys", 
+        tienda: "Epic Games Store / Consolas", 
+        modo: "Multijugador Party",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i5", ram: "8 GB", gpu: "NVIDIA GTX 660 / AMD Radeon HD 7950" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel Core i5 superior", ram: "8 GB", gpu: "NVIDIA GTX 1060" }
+        }
+      },
+      { 
+        nombre: "Overwatch 2", 
+        tienda: "Steam / Battle.net / Consolas", 
+        modo: "Multijugador en Equipo",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i3 / AMD Phenom X4", ram: "6 GB", gpu: "NVIDIA GTX 600 / AMD HD 7000" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel Core i7 / AMD Ryzen 5", ram: "8 GB", gpu: "NVIDIA GTX 1060 / AMD R9 380" }
+        }
+      },
+      { 
+        nombre: "Roblox", 
+        tienda: "Sitio Oficial / Mobile / Consolas", 
+        modo: "Multijugador Social / Amigos",
+        req: {
+          min: { os: "Windows 7 / Android 5.0", cpu: "Processor 1.6 GHz", ram: "1 GB", gpu: "DirectX 10 / Shader Model 3.0" },
+          rec: { os: "Windows 10 / iOS 12+", cpu: "Dual Core 2.5 GHz+", ram: "4 GB", gpu: "Dedicated GPU 1GB VRAM" }
+        }
+      },
+      { 
+        nombre: "Genshin Impact", 
+        tienda: "Epic Games / Sitio Oficial / Mobile / PS", 
+        modo: "Historia (Solo) / Co-op Opcional",
+        req: {
+          min: { os: "Windows 7 SP1 64-bit", cpu: "Intel Core i5", ram: "8 GB", gpu: "NVIDIA GeForce GT 1030" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel Core i7", ram: "16 GB", gpu: "NVIDIA GeForce GTX 1060 6GB" }
+        }
+      },
+      { 
+        nombre: "Call of Duty: Warzone", 
+        tienda: "Steam / Battle.net / Consolas", 
+        modo: "Multijugador / Con Amigos",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i5-6600K", ram: "12 GB", gpu: "NVIDIA GeForce GTX 960" },
+          rec: { os: "Windows 10/11 64-bit", cpu: "Intel Core i7-8700K", ram: "16 GB", gpu: "NVIDIA GeForce RTX 3060" }
+        }
+      },
+      { 
+        nombre: "Clash Royale", 
+        tienda: "Google Play / Apple App Store", 
+        modo: "Multijugador 1v1 y 2v2",
+        req: {
+          min: { os: "Android 5.0 / iOS 11.0", cpu: "Dual-Core 1.0 GHz", ram: "1 GB", gpu: "Cualquiera compatible" },
+          rec: { os: "Android 9.0+ / iOS 13+", cpu: "Quad-Core 1.8 GHz", ram: "2 GB", gpu: "GPU Integrada estándar" }
+        }
+      },
+      { 
+        nombre: "Terraria", 
+        tienda: "Steam / GOG / Mobile / Consolas", 
+        modo: "Solo / Cooperativo con Amigos",
+        req: {
+          min: { os: "Windows 7 / 8 / 10", cpu: "2.0 GHz", ram: "2.5 GB", gpu: "128MB VRAM con Shader Model 2.0" },
+          rec: { os: "Windows 10 64-bit", cpu: "Dual Core 3.0 Ghz", ram: "4 GB", gpu: "256MB VRAM Shader Model 3.0" }
+        }
+      },
+      { 
+        nombre: "Cyberpunk 2077", 
+        tienda: "Steam / Epic Games / GOG / Consolas", 
+        modo: "Solo (Modo Historia)",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Core i7-6700 / Ryzen 5 1600", ram: "12 GB", gpu: "GTX 1060 6GB / RX 580" },
+          rec: { os: "Windows 10 64-bit", cpu: "Core i7-12700 / Ryzen 7 7800X3D", ram: "16 GB", gpu: "RTX 2060 SUPER / RX 5700 XT" }
+        }
+      },
+      { 
+        nombre: "Red Dead Redemption 2", 
+        tienda: "Steam / Epic Games / Rockstar Launcher", 
+        modo: "Historia (Solo) / RDR Online",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i5-2500K", ram: "8 GB", gpu: "Nvidia GeForce GTX 770 2GB" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel Core i7-4770K", ram: "12 GB", gpu: "Nvidia GeForce GTX 1060 6GB" }
+        }
+      },
+      { 
+        nombre: "God of War Ragnarök", 
+        tienda: "PlayStation Store / Steam", 
+        modo: "Solo (Modo Historia)",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel i5-4670k / Ryzen 3 1200", ram: "8 GB", gpu: "GTX 1060 (6GB) / RX 5500 XT" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel i5-8600 / Ryzen 5 3600", ram: "16 GB", gpu: "RTX 2060 Super / RX 5700" }
+        }
+      },
+      { 
+        nombre: "Elden Ring", 
+        tienda: "Steam / PlayStation / Xbox", 
+        modo: "Historia (Solo) / Co-op Opcional",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "INTEL CORE I5-8400", ram: "12 GB", gpu: "NVIDIA GEFORCE GTX 1060 3GB" },
+          rec: { os: "Windows 10/11 64-bit", cpu: "INTEL CORE I7-8700K", ram: "16 GB", gpu: "NVIDIA GEFORCE GTX 1070 8GB" }
+        }
+      },
+      { 
+        nombre: "Stardew Valley", 
+        tienda: "Steam / GOG / Mobile / Consolas", 
+        modo: "Solo / Cooperativo con Amigos",
+        req: {
+          min: { os: "Windows 7 o superior", cpu: "2 Ghz", ram: "2 GB", gpu: "256 mb video memory, shader model 3.0" },
+          rec: { os: "Windows 10 64-bit", cpu: "2.5 Ghz+", ram: "4 GB", gpu: "GPU Dedicada básica" }
+        }
+      },
+      { 
+        nombre: "The Witcher 3: Wild Hunt", 
+        tienda: "Steam / Epic Games / GOG / Consolas", 
+        modo: "Solo (Modo Historia)",
+        req: {
+          min: { os: "Windows 7 / 8 / 10 64-bit", cpu: "Intel Core i5-2500K 3.3GHz", ram: "6 GB", gpu: "Nvidia GeForce GTX 660" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel Core i7-3770 3.4 GHz", ram: "8 GB", gpu: "Nvidia GeForce GTX 770" }
+        }
+      },
+      { 
+        nombre: "PUBG: Battlegrounds", 
+        tienda: "Steam / Consolas / Mobile", 
+        modo: "Multijugador / Con Amigos",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i5-4430", ram: "8 GB", gpu: "NVIDIA GeForce GTX 960 2GB" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel Core i5-6600K", ram: "16 GB", gpu: "NVIDIA GeForce GTX 1060 3GB" }
+        }
+      },
+      { 
+        nombre: "Rainbow Six Siege", 
+        tienda: "Steam / Ubisoft Connect / Consolas", 
+        modo: "Multijugador Táctico",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i3 560 3.3 GHz", ram: "6 GB", gpu: "Nvidia GeForce GTX 460" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel Core i5-2500K 3.3 GHz", ram: "8 GB", gpu: "Nvidia GeForce GTX 670" }
+        }
+      },
+      { 
+        nombre: "Phasmophobia", 
+        tienda: "Steam (PC)", 
+        modo: "Terror Cooperativo con Amigos",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i5-4590", ram: "8 GB", gpu: "NVIDIA GTX 970 / AMD Radeon R9 290" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel i5-10600 / AMD Ryzen 5 3600", ram: "8 GB", gpu: "NVIDIA RTX 2060 / AMD RX 5700" }
+        }
+      },
+      { 
+        nombre: "Dead by Daylight", 
+        tienda: "Steam / Epic Games / Consolas", 
+        modo: "Multijugador Asimétrico",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i3-4170", ram: "8 GB", gpu: "GeForce GTX 460 1GB" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel Core i3-4170", ram: "8 GB", gpu: "GeForce GTX 760 4GB" }
+        }
+      },
+      { 
+        nombre: "It Takes Two", 
+        tienda: "Steam / EA App / Consolas", 
+        modo: "Cooperativo Obligatorio (2 Jugadores)",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i3-2100T", ram: "8 GB", gpu: "Nvidia GeForce GTX 660" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel Core i5-3570K", ram: "16 GB", gpu: "Nvidia GeForce GTX 980" }
+        }
+      },
+      { 
+        nombre: "Hollow Knight", 
+        tienda: "Steam / GOG / Consolas", 
+        modo: "Solo (Modo Historia)",
+        req: {
+          min: { os: "Windows 7", cpu: "Intel Core 2 Duo E5200", ram: "4 GB", gpu: "GeForce 9800GTX+ (1GB)" },
+          rec: { os: "Windows 10", cpu: "Intel Core i5", ram: "8 GB", gpu: "GeForce GTX 560+" }
+        }
+      },
+      { 
+        nombre: "Lethal Company", 
+        tienda: "Steam (PC)", 
+        modo: "Cooperativo con Amigos",
+        req: {
+          min: { os: "Windows 10 64-bit", cpu: "Intel Core i5-7400", ram: "4 GB", gpu: "NVIDIA GeForce GTX 1050" },
+          rec: { os: "Windows 10 64-bit", cpu: "Intel Core i5-9400F", ram: "8 GB", gpu: "NVIDIA GeForce GTX 1660" }
+        }
+      }
+    ];
+
+    function mostrarJuegos(lista) {
+      const grid = document.getElementById('results-grid');
+      grid.innerHTML = '';
+
+      if (lista.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-sub);">
+            <p>No se encontraron resultados para tu búsqueda.</p>
+          </div>
+        `;
+        return;
+      }
+
+      lista.forEach((juego, index) => {
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        // Agregamos evento click para abrir los requisitos
+        card.onclick = () => abrirModal(juego);
+
+        card.innerHTML = `
+          <div class="game-title">${juego.nombre}</div>
+         
+          <div class="badge-container">
+            <div>
+              <span class="badge-label">Disponible en:</span><br>
+              <span class="badge-store">${juego.tienda}</span>
+            </div>
+            <div style="margin-top: 4px;">
+              <span class="badge-label">Modo de Juego:</span><br>
+              <span class="badge-mode">${juego.modo}</span>
+            </div>
+          </div>
+          <div class="click-hint"> Ver requisitos ➔</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function filtrarJuegos() {
+      const texto = document.getElementById('searchInput').value.toLowerCase();
+      const filtrados = catálogoJuegos.filter(juego =>
+        juego.nombre.toLowerCase().includes(texto) ||
+        juego.tienda.toLowerCase().includes(texto) ||
+        juego.modo.toLowerCase().includes(texto)
+      );
+      mostrarJuegos(filtrados);
+    }
+
+    // Funciones para el Modal de Requisitos
+    function abrirModal(juego) {
+      document.getElementById('modalGameTitle').innerText = juego.nombre;
+      
+      // Llenar Mínimos
+      document.getElementById('minOs').innerText = juego.req.min.os;
+      document.getElementById('minCpu').innerText = juego.req.min.cpu;
+      document.getElementById('minRam').innerText = juego.req.min.ram;
+      document.getElementById('minGpu').innerText = juego.req.min.gpu;
+
+      // Llenar Recomendados
+      document.getElementById('recOs').innerText = juego.req.rec.os;
+      document.getElementById('recCpu').innerText = juego.req.rec.cpu;
+      document.getElementById('recRam').innerText = juego.req.rec.ram;
+      document.getElementById('recGpu').innerText = juego.req.rec.gpu;
+
+      // Mostrar modal
+      document.getElementById('reqModal').classList.add('active');
+    }
+
+    function cerrarModal() {
+      document.getElementById('reqModal').classList.remove('active');
+    }
+
+    function cerrarModalAfuera(e) {
+      if (e.target.id === 'reqModal') {
+        cerrarModal();
+      }
+    }
+
+    // Inicializar lista
+    document.addEventListener('DOMContentLoaded', () => mostrarJuegos(catálogoJuegos));
+  </script>
+</body>
+</html>
